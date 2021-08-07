@@ -1,6 +1,5 @@
 import concurrent.futures
 import os
-
 from bs4 import BeautifulSoup as soup
 from flask import Flask, render_template, request
 from flask import send_file
@@ -14,12 +13,12 @@ app = Flask(__name__)
 
 
 class NGO:
-    def collect(self, url, i, op, wb, sh1, filename):
-        print(str(i + 1))
-        driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=op)
+    def collect(self, url, i, options, wb, sh1, filename):
+        print(str(i))
+        driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
         driver.get(url)
         driver.implicitly_wait(10)
-        all = driver.find_element_by_xpath("/html/body/div[9]/div[1]/div[3]/div/div/div[2]/table/tbody/tr[" + str(i + 1) + "]/td[2]/a")
+        all = driver.find_element_by_xpath("/html/body/div[9]/div[1]/div[3]/div/div/div[2]/table/tbody/tr[" + str(i) + "]/td[2]/a")
         all.click()
         overlay = WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "div.blockUI.blockOverlay")))
         if overlay:
@@ -35,7 +34,7 @@ class NGO:
         email = sp.find(id="email_n")
         # print("row", str(i + 1))
         # print("name:", name.text)
-        # print("address:", add.text)
+        # print("add:", add.text)
         # print("date", date.text)
         # print("mobile", mobile.text)
         # print("email", email.text)
@@ -58,11 +57,19 @@ def test():
 
 @app.route('/scrape', methods=["GET", "POST"])
 def scrape():
-    op = webdriver.ChromeOptions()
-    op.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-    op.add_argument("--headless")
-    op.add_argument("--no-sandbox")
-    op.add_argument("--disable-dev-sh-usage")
+    options = webdriver.ChromeOptions()
+    options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    options.headless = True
+    options.add_argument("--window-size=1920,1080")
+    options.add_argument('--ignore-certificate-errors')
+    options.add_argument('--allow-running-insecure-content')
+    options.add_argument("--disable-extensions")
+    options.add_argument("--proxy-server='direct://'")
+    options.add_argument("--proxy-bypass-list=*")
+    options.add_argument("--start-maximized")
+    options.add_argument('--disable-gpu')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--no-sandbox')
     wb = Workbook()
     sh1 = wb.active
     row = sh1.max_row
@@ -72,24 +79,27 @@ def scrape():
     sh1.cell(row=1, column=3, value="address")
     sh1.cell(row=1, column=4, value="phone no")
     sh1.cell(row=1, column=5, value="email")
+    url = request.form.get("url")
+    start = request.form.get("start")
+    rows = request.form.get("Number")
+    filename = request.form.get("page")
+    wb.save(filename + ".xls")
     if request.method == "POST":
-        url = request.form.get("url")
-        rows = request.form.get("Number")
-        filename = request.form.get("page")
         with concurrent.futures.ThreadPoolExecutor(max_workers=int(rows)) as executor:
-            future_to_url = {executor.submit(ngo.collect, url, i, op, wb, sh1, filename): i for i in range(int(rows))}
-
+            future_to_url = {executor.submit(ngo.collect, url, i, options, wb, sh1, filename): i for i in range(int(start), int(rows) + 1)}
             for future in concurrent.futures.as_completed(future_to_url):
                 url = future_to_url[future]
+                print("url", url)
                 try:
                     data = future.result()
+                    print("data", data)
                 except Exception as exc:
                     print('%r generated an exception: %s' % (url, exc))
                 else:
                     print('%r page is %d bytes' % (url, len(data)))
 
-        response = send_file(filename + ".xls")
-        return response
+    response = send_file(filename + ".xls")
+    return response
 
 
 ngo = NGO()

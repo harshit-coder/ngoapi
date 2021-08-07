@@ -9,7 +9,10 @@
 <form action="{{ url_for('scrape') }}" method ="post">
   <label for="url">Enter the URL : </label><br>
   <input type="url" id="url" name="url"><br>
-     <label for="Number">Enter the rows in that URL page table  : </label><br>
+        <label for="start">Enter the start  row from where you want to start    : </label><br>
+  <input type="Number" id="start" name="start"><br>
+
+     <label for="Number">Enter the final row to where you want to end    : </label><br>
   <input type="Number" id="Number" name="Number"><br>
      <label for="page">Enter that page number of which you are copying data  : </label><br>
   <input type="Number" id="page" name="page"><br>
