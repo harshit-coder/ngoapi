@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<p>Keep your net connection on and don't do anything when window open or closes</p>
+<form action="{{ url_for('scrape') }}" method ="post">
+  <label for="url">Enter the URL : </label><br>
+  <input type="url" id="url" name="url"><br>
+     <label for="Number">Enter the rows in that URL page table  : </label><br>
+  <input type="Number" id="Number" name="Number"><br>
+     <label for="page">Enter that page number of which you are copying data  : </label><br>
+  <input type="Number" id="page" name="page"><br>
+
+
+  <input type="submit" value="Submit">
+
+    <p>pLease verify data of excel sheet from the page</p>
+</form>
+
+</body>
+</html>
