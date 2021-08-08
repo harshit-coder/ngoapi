@@ -98,8 +98,8 @@ def scrape():
                 else:
                     print('%r page is %d bytes' % (url, len(data)))
 
-        response = "success"
-        return response
+            response = "success"
+            return response
 
 
 ngo = NGO()
