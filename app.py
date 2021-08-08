@@ -98,8 +98,8 @@ def scrape():
                 else:
                     print('%r page is %d bytes' % (url, len(data)))
 
-    response = send_file(filename + ".xls")
-    return response
+        response = "success"
+        return response
 
 
 ngo = NGO()
