@@ -13,9 +13,8 @@ app = Flask(__name__)
 
 
 class NGO:
-    def collect(self, url, i, options, wb, sh1, filename):
+    def collect(self, url, i, options, wb, sh1, filename, driver):
         print(str(i))
-        driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
         driver.get(url)
         driver.implicitly_wait(10)
         all = driver.find_element_by_xpath("/html/body/div[9]/div[1]/div[3]/div/div/div[2]/table/tbody/tr[" + str(i) + "]/td[2]/a")
@@ -46,8 +45,6 @@ class NGO:
         sh1.cell(row=i + 1, column=4, value=mobile.text)
         sh1.cell(row=i + 1, column=5, value=email.text)
         wb.save(filename + ".xls")
-        driver.close()
-
 
 
 @app.route('/')
@@ -70,6 +67,7 @@ def scrape():
     options.add_argument('--disable-gpu')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--no-sandbox')
+    driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
     wb = Workbook()
     sh1 = wb.active
     row = sh1.max_row
@@ -86,7 +84,7 @@ def scrape():
     wb.save(filename + ".xls")
     if request.method == "POST":
         with concurrent.futures.ThreadPoolExecutor(max_workers=int(rows)) as executor:
-            future_to_url = {executor.submit(ngo.collect, url, i, options, wb, sh1, filename): i for i in range(int(start), int(rows) + 1)}
+            future_to_url = {executor.submit(ngo.collect, url, i, options, wb, sh1, filename, driver): i for i in range(int(start), int(rows) + 1)}
             for future in concurrent.futures.as_completed(future_to_url):
                 url = future_to_url[future]
                 print("url", url)
@@ -98,8 +96,8 @@ def scrape():
                 else:
                     print('%r page is %d bytes' % (url, len(data)))
 
-            response = "success"
-            return response
+    response = "success"
+    return response
 
 
 ngo = NGO()
