@@ -19,10 +19,12 @@ class NGO:
         driver.implicitly_wait(10)
         all = driver.find_element_by_xpath("/html/body/div[9]/div[1]/div[3]/div/div/div[2]/table/tbody/tr[" + str(i) + "]/td[2]/a")
         all.click()
+        time.sleep(10)
         overlay = WebDriverWait(driver, 10).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "div.blockUI.blockOverlay")))
         if overlay:
             close = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, "//*[@id='ngo_info_modal']/div[2]/div/div[1]/button/span")))
             close.click()
+            time.sleep(2)
         ngo = driver.find_element_by_id('ngo_info_modal')
         result = ngo.get_attribute('innerHTML')
         sp = soup(result, 'html.parser')
@@ -98,6 +100,9 @@ def scrape():
 
             response = "success"
             return response
+    driver.close()
+    response = "success"
+    return response
 
 
 ngo = NGO()
