@@ -83,7 +83,7 @@ def scrape():
     filename = request.form.get("page")
     wb.save(filename + ".xls")
     if request.method == "POST":
-        with concurrent.futures.ThreadPoolExecutor(max_workers=int(rows)) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=int(rows)+1) as executor:
             future_to_url = {executor.submit(ngo.collect, url, i, options, wb, sh1, filename, driver): i for i in range(int(start), int(rows) + 1)}
             for future in concurrent.futures.as_completed(future_to_url):
                 url = future_to_url[future]
