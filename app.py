@@ -47,7 +47,7 @@ class NGO:
         sh1.cell(row=i + 1, column=5, value=email.text)
         wb.save(filename + ".xls")
         driver.close()
-        return line
+
 
 
 @app.route('/')
