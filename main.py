@@ -2,28 +2,20 @@ import os
 import time
 
 from bs4 import BeautifulSoup as soup
-from fastapi import FastAPI, BackgroundTasks, Request, Form
+from flask import Flask, render_template, request
 from openpyxl import Workbook
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from fastapi.templating import Jinja2Templates
-from fastapi.responses import FileResponse
 
-app = FastAPI()
-templates = Jinja2Templates(directory="templates")
-
-
-@app.get("/")
-def home(request: Request):
-    return templates.TemplateResponse("form.html", {"request": request})
+app = Flask(__name__)
 
 
 class NGO:
     def collect(self, url, options, wb, sh1, filename, start, rows):
-        l1=[]
-        d1={}
+        l1 = []
+        d1 = {}
         # driver = webdriver.Chrome(executable_path="chromedriver.exe", options=options)
         driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
         for i in range(int(start), int(rows) + 1):
@@ -61,20 +53,23 @@ class NGO:
             d1["address"] = add.text
             d1["mobile"] = mobile.text
             d1["email"] = email.text
-            l1.insert(i,d1.copy())
+            l1.insert(i, d1.copy)
         print("\n")
         print("---------------START COPYING------------")
         print("\n")
         print(l1)
         print("\n")
         print("---------------END COPYING------------")
-
-        fileset(str(filename))
         driver.close()
 
 
-@app.post('/scrape')
-async def scrape(background_tasks: BackgroundTasks, url: str = Form(...), start: str = Form(...), Number: str = Form(...), page: str = Form(...)):
+@app.route('/')
+def test():
+    return render_template("form.html")
+
+
+@app.route('/scrape', methods=["GET", "POST"])
+def scrape():
     # user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36"
     options = webdriver.ChromeOptions()
     # options.add_argument(f'user-agent={user_agent}')
@@ -97,19 +92,17 @@ async def scrape(background_tasks: BackgroundTasks, url: str = Form(...), start:
     sh1.cell(row=1, column=3, value="address")
     sh1.cell(row=1, column=4, value="phone no")
     sh1.cell(row=1, column=5, value="email")
-
-    url = url
-    start = start
-    rows = Number
-    filename = page
+    url = request.form.get("url")
+    start = request.form.get("start")
+    rows = request.form.get("Number")
+    filename = request.form.get("page")
     wb.save(filename + ".xls")
-    background_tasks.add_task(ngo.collect, url, options, wb, sh1, filename, start, rows)
-    return {"message": "success"}
-
-
-@app.get('/fileset')
-def fileset(filename):
-    return FileResponse(str(filename) + ".xls")
+    if request.method == "POST":
+        ngo.collect(url, options, wb, sh1, filename, start, rows)
+        response = "success"
+        return response
 
 
 ngo = NGO()
+if __name__ == "__main__":
+    app.run(debug=True)
