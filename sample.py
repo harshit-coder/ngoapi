@@ -86,7 +86,7 @@ for i in range(start, last + 1):
     d1["address"] = add.text
     d1["mobile"] = mobile.text
     d1["email"] = email.text
-    l1.insert(i, d1)
+    l1.insert(i, d1.copy())
     sh1.cell(row=i + 1, column=1, value=name.text)
     sh1.cell(row=i + 1, column=2, value=date.text)
     sh1.cell(row=i + 1, column=3, value=add.text)
