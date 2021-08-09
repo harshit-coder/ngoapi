@@ -30,13 +30,13 @@ sh1.cell(row=1, column=3, value="address")
 sh1.cell(row=1, column=4, value="phone no")
 sh1.cell(row=1, column=5, value="email")
 
-#user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36"
+# user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36"
 
 options = webdriver.ChromeOptions()
 options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
 options.headless = True
 
-#options.add_argument(f'user-agent={user_agent}')
+# options.add_argument(f'user-agent={user_agent}')
 options.add_argument("--window-size=1920,1080")
 options.add_argument('--ignore-certificate-errors')
 options.add_argument('--allow-running-insecure-content')
@@ -47,13 +47,15 @@ options.add_argument("--start-maximized")
 options.add_argument('--disable-gpu')
 options.add_argument('--disable-dev-shm-usage')
 options.add_argument('--no-sandbox')
-#driver = webdriver.Chrome(executable_path="chromedriver.exe", options=options)
+# driver = webdriver.Chrome(executable_path="chromedriver.exe", options=options)
 driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
-for i in range(start, last+1):
+l1 = []
+d1 = {}
+for i in range(start, last + 1):
     print(str(i))
-    #driver = webdriver.Chrome(executable_path="chromedriver.exe", options=op)
+    # driver = webdriver.Chrome(executable_path="chromedriver.exe", options=op)
     driver.get(url)
-    #driver.implicitly_wait(10)
+    # driver.implicitly_wait(10)
     all = driver.find_element_by_xpath("/html/body/div[9]/div[1]/div[3]/div/div/div[2]/table/tbody/tr[" + str(i) + "]/td[2]/a")
     all.click()
     time.sleep(10)
@@ -78,6 +80,13 @@ for i in range(start, last+1):
     # print("email", email.text)
     line = str(i), name.text, add.text, date.text, mobile.text, email.text
     print(line)
+    d1["id"] = str(i)
+    d1["name "] = name.text
+    d1["regdate"] = date.text
+    d1["address"] = add.text
+    d1["mobile"] = mobile.text
+    d1["email"] = email.text
+    l1.append(d1)
     sh1.cell(row=i + 1, column=1, value=name.text)
     sh1.cell(row=i + 1, column=2, value=date.text)
     sh1.cell(row=i + 1, column=3, value=add.text)
@@ -86,4 +95,10 @@ for i in range(start, last+1):
     wb.save(filename + ".xls")
 
 print("---------------pLease verify data of excel sheet from the page------------")
+print("\n")
+print("---------------START COPYTING------------")
+print("\n")
+print(l1)
+print("\n")
+print("---------------END COPYTING------------")
 driver.close()

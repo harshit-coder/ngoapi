@@ -22,6 +22,8 @@ def home(request: Request):
 
 class NGO:
     def collect(self, url, options, wb, sh1, filename, start, rows):
+        l1=[]
+        d1={}
         # driver = webdriver.Chrome(executable_path="chromedriver.exe", options=options)
         driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
         for i in range(int(start), int(rows) + 1):
@@ -53,6 +55,19 @@ class NGO:
             sh1.cell(row=i + 1, column=5, value=email.text)
             wb.save(filename + ".xls")
             print(line)
+            d1["id"] = str(i)
+            d1["name "] = name.text
+            d1["regdate"] = date.text
+            d1["address"] = add.text
+            d1["mobile"] = mobile.text
+            d1["email"] = email.text
+            l1.append(d1)
+        print("\n")
+        print("---------------START COPYTING------------")
+        print("\n")
+        print(l1)
+        print("\n")
+        print("---------------END COPYTING------------")
 
         fileset(str(filename))
 
