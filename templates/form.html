@@ -2,26 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
     <title>Title</title>
 </head>
 <body>
-<p>Keep your net connection on and don't do anything when window open or closes</p>
-<form action="/scrape" method ="post">
-  <label for="url">Enter the URL : </label><br>
-  <input type="url" id="url" name="url"><br>
-        <label for="start">Enter the start  row from where you want to start    : </label><br>
-  <input type="Number" id="start" name="start"><br>
-
-     <label for="Number">Enter the final row to where you want to end    : </label><br>
-  <input type="Number" id="Number" name="Number"><br>
-     <label for="page">Enter that page number of which you are copying data  : </label><br>
-  <input type="Number" id="page" name="page"><br>
 
 
-  <input type="submit" value="Submit">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container">
+    <a class="navbar-brand" href="/">NGO SCRAPER</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/enter_data">Download xls </a>
+        </li>
+              <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/enter_data_2">Check Tables</a>
+        </li>
+                <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/get_status_data">Check status</a>
+        </li>
 
-    <p>pLease verify data of excel sheet from the page</p>
+             <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/stream-logs">Check live</a>
+        </li>
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+<div class="container text-center">
+    <form class="my-5" action="/submit_data" method ="post">
+  <div class="mb-3">
+
+          <label for="state">Choose a state:</label>
+
+<select name="state" id="states">
+    {% for key,value in states.items() %}
+  <option value="{{value}}">{{ value}}</option>
+
+    {% endfor %}
+
+</select>
+
+  </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
 </form>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
 </body>
 </html>
