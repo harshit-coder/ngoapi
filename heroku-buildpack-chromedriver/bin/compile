@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# bin/compile <build-dir> <cache-dir> <env-dir>
+
+set -o errexit
+set -o pipefail
+set -o nounset
+unset GIT_DIR
+
+function topic() {
+  echo "-----> $*..."
+}
+
+function indent() {
+  c='s/^/       /'
+  case $(uname) in
+    Darwin) sed -l "$c";;
+    *)      sed -u "$c";;
+  esac
+}
+
+BUILD_DIR=${1:-}
+CACHE_DIR=${2:-}
+ENV_DIR=${3:-}
+
+BIN_DIR=$BUILD_DIR/.chromedriver/bin
+mkdir -p $BIN_DIR
+
+if [ -f $ENV_DIR/CHROMEDRIVER_VERSION ]; then
+  VERSION=$(cat $ENV_DIR/CHROMEDRIVER_VERSION)
+else
+  topic "Looking up latest chromedriver version"
+  LATEST="https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
+  VERSION=`curl -s $LATEST`
+fi
+indent "Version $VERSION"
+
+topic "Downloading chromedriver v$VERSION"
+ZIP_URL="https://chromedriver.storage.googleapis.com/$VERSION/chromedriver_linux64.zip"
+ZIP_LOCATION="/tmp/chromedriver.zip"
+curl -s -o $ZIP_LOCATION $ZIP_URL
+unzip -o $ZIP_LOCATION -d $BIN_DIR
+rm -f $ZIP_LOCATION
+indent "Downloaded"
+
+topic "Creating chromedriver export scripts"
+mkdir -p $BUILD_DIR/.profile.d
+echo "export PATH=\$PATH:\$HOME/.chromedriver/bin" >> $BUILD_DIR/.profile.d/chromedriver.sh
+indent "Created"
