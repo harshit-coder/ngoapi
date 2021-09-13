@@ -14,7 +14,7 @@ connect = db_connect()
 
 
 def collect_data():
-    driver = webdriver.Chrome('chromedriver', options=options)
+    driver = webdriver.Chrome('./chromedriver', options=options)
     # driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
     driver.get("https://ngodarpan.gov.in/index.php/home/statewise")
     states = driver.find_elements_by_class_name("bluelink11px")
@@ -74,7 +74,7 @@ def collect_data():
             url_1 = url.replace(url[length - 1], str(j))
             url_2 = url_1 + "?per_page=100"
             try:
-                driver = webdriver.Chrome('chromedriver', options=options)
+                driver = webdriver.Chrome('./chromedriver', options=options)
                 # driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
                 driver.get(url_2)
                 driver.close()
@@ -115,7 +115,7 @@ def collect(row, url_2, state_name, page_no, pages, num):
     count = 0
     for i in range(1, int(row) + 1):
         count = count + 1
-        driver = webdriver.Chrome('chromedriver', options=options)
+        driver = webdriver.Chrome('./chromedriver', options=options)
         # driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
         driver.get(url_2)
         try:
@@ -181,7 +181,7 @@ def collect(row, url_2, state_name, page_no, pages, num):
 
 
 def collect_data_update():
-    driver = webdriver.Chrome('chromedriver', options=options)
+    driver = webdriver.Chrome('./chromedriver', options=options)
     # driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
     driver.get("https://ngodarpan.gov.in/index.php/home/statewise")
     states = driver.find_elements_by_class_name("bluelink11px")
@@ -241,7 +241,7 @@ def collect_data_update():
             url_1 = url.replace(url[length - 1], str(j))
             url_2 = url_1 + "?per_page=100"
             try:
-                driver = webdriver.Chrome('chromedriver', options=options)
+                driver = webdriver.Chrome('./chromedriver', options=options)
                 # driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
                 driver.get(url_2)
                 driver.close()
@@ -279,7 +279,7 @@ def collect_update(row, url_2, state_name, page_no, pages, num):
     count = 0
     for i in range(1, int(row) + 1):
         count = count + 1
-        driver = webdriver.Chrome('chromedriver', options=options)
+        driver = webdriver.Chrome('./chromedriver', options=options)
         # driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
         driver.get(url_2)
         try:
