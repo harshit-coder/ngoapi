@@ -2,9 +2,124 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
     <title>Title</title>
 </head>
 <body>
 
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container">
+    <a class="navbar-brand" href="/">NGO SCRAPER</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/enter_data">Download xls </a>
+        </li>
+              <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/enter_data_2">Check Tables</a>
+        </li>
+                <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/get_status_data">Check status</a>
+        </li>
+
+             <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/stream-logs">Check live</a>
+        </li>
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <form action="/submit_data_3" method ="post">
+
+    <label for="state">Choose a state:</label>
+
+<select name="state" id="states">
+    {% for key,value in dr.items() %}
+  <option value="{{value}}">{{value}}</option>
+
+    {% endfor %}
+
+</select>
+    <label for="status">Choose a status:</label>
+
+<select name="status" id="status">
+  <option value="row insert success">Row Insert Success</option>
+  <option value="row insert fail">Row Insert Fail</option>
+  <option value="row update success">Row Update Success</option>
+  <option value="row update fail">Row Update Fail</option>
+  <option value="page insert fail">Page Insert Fail</option>
+
+  <option value="page update fail">Page Update Fail</option>
+</select>
+
+
+  <input type="submit" value="Submit">
+</form>
+
+
+ <smalL>ROW AND NGOS ARE SAME</smalL>
+<table class="table table-responsive my-5">
+  <tr>
+    <th>State Name</th>
+    <th>Total Pages</th>
+    <th>Total Ngos</th>
+    <th>Insert Row Success</th>
+    <th>Insert Row Fail</th>
+    <th>Update Row Success</th>
+    <th>Update Row Fail</th>
+    <th>Insert Page Fail</th>
+    <th>Update Page Fail</th>
+  </tr>
+  <tbody id="status">
+  {% for key , value in dt.items() %}
+    <tr>
+    <td>{{ key }}</td>
+
+    <td>{{ value['total_pages'] }}</td>
+    <td>{{ value['total_ngos'] }}</td>
+    <td>{{ value['row insert success']['no_of_rows'] }}</td>
+      {% if value['row insert fail'] %}
+      <td>{{ value['row insert fail']['no_of_rows'] }}</td>
+      {% else %}
+      <td> 0</td>
+      {% endif %}
+      {% if value['row update success'] %}
+      <td>{{ value['row update success']['no_of_rows'] }}</td>
+      {% else %}
+      <td>0</td>
+      {% endif %}
+      {% if value['row update fail'] %}
+      <td>{{ value['row update fail']['no_of_rows'] }}</td>
+       {% else %}
+      <td>0</td>
+      {% endif %}
+      {% if value['page insert fail'] %}
+      <td>{{ value['page insert fail']['no_of_pages'] }}</td>
+       {% else %}
+      <td>0</td>
+      {% endif %}
+      {% if value['page update fail'] %}
+  <td>{{ value['page update fail']['no_of_pages'] }}</td>
+       {% else %}
+      <td>0</td>
+      {% endif %}
+  </tr>
+  {% endfor %}
+  </tbody>
+
+</table>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
 </body>
 </html>
