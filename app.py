@@ -9,7 +9,7 @@ from sh import tail
 from sse_starlette.sse import EventSourceResponse
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from starlette.responses import FileResponse, RedirectResponse
+from starlette.responses import FileResponse
 
 from app_moules import return_states
 from workker import *
@@ -149,6 +149,7 @@ async def logGenerator(request):
             print("client disconnected!!!")
             break
         yield line
+    time.sleep(0.5)
 
 
 @app.get('/stream-logs')
