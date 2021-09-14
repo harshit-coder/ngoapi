@@ -11,7 +11,8 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import FileResponse, RedirectResponse
 
-from app_moules import *
+from app_moules import return_states
+from workker import *
 
 from database import db_connect, LOGFILE
 
@@ -28,14 +29,22 @@ app.add_middleware(
 
 d4 = {}
 
-sql_2 = 'SELECT COUNT(id) FROM states'
-cd = connect.query_database_df(sql_2)
-print(cd['COUNT(id)'][0])
+try:
+    sql_2 = 'SELECT COUNT(id) FROM states'
+    cd = connect.query_database_df(sql_2)
+    print(cd['COUNT(id)'][0])
+except Exception as e:
+    exc_type, exc_obj, exc_tb = sys.exc_info()
+    logger.info("exception in getting state list " + str(e) + ' ' + str(exc_tb.tb_lineno))
 
-sql_1 = 'SELECT * FROM states'
-c_1 = connect.query_database_df(sql_1)
-for k in range(0, len(c_1)):
-    d4[c_1['id'][k]] = c_1['state_name'][k]
+try:
+    sql_1 = 'SELECT * FROM states'
+    c_1 = connect.query_database_df(sql_1)
+    for k in range(0, len(c_1)):
+        d4[c_1['id'][k]] = c_1['state_name'][k]
+except Exception as e:
+    exc_type, exc_obj, exc_tb = sys.exc_info()
+    logger.info("exception in getting state and state id " + str(e) + ' ' + str(exc_tb.tb_lineno))
 
 
 @app.get('/')
@@ -45,15 +54,16 @@ def enter(request: Request):
 
 @app.get("/scrape_data")
 async def home(background_tasks: BackgroundTasks):
-    background_tasks.add_task(collect_data)
-    #response = RedirectResponse(url='/stream-logs')
-    response= {"message":"process running"}
+    background_tasks.add_task(collect_data.delay())
+    # response = RedirectResponse(url='/stream-logs')
+    response = {"message": "process running"}
     return response
 
 
 @app.get("/update_scrape_data")
 async def update(background_tasks: BackgroundTasks):
-    #response = RedirectResponse(url='/stream-logs')
+    # response = RedirectResponse(url='/stream-logs')
+    background_tasks.add_task(collect_data_update.delay())
     response = {"message": "process running"}
     return response
 
@@ -67,58 +77,70 @@ def enter(request: Request, dt: dict = None):
 
 @app.post('/submit_data')
 async def download(state: str = Form(...)):
-    print(state)
-    d1, d2 = return_states()
-    wb = Workbook()
-    total_ngos = d1[state]['total_ngos']
-    for key, value in d1[state]['pages'].items():
-        if key == "1":
-            ws1 = wb.active
-            ws1.title = "Page_no" + str(key)
-        else:
-            ws1 = wb.create_sheet("Page_no" + str(key))
-        ws1.cell(row=1, column=1, value='row')
-        ws1.cell(row=1, column=2, value="name")
-        ws1.cell(row=1, column=3, value="reg_date")
-        ws1.cell(row=1, column=4, value="address")
-        ws1.cell(row=1, column=5, value="phone no")
-        ws1.cell(row=1, column=6, value="email")
-        i = 2
-        for k in value:
-            ws1.cell(row=i, column=1, value=k['ngo_row'])
-            ws1.cell(row=i, column=2, value=k['ngo_name'])
-            ws1.cell(row=i, column=3, value=k['reg_date'])
-            ws1.cell(row=i, column=4, value=k['ngo_address'])
-            ws1.cell(row=i, column=5, value=k['ngo_mobile'])
-            ws1.cell(row=i, column=6, value=k['ngo_email'])
-            i = i + 1
-    wb.save("./ngos.xlsx")
-    return FileResponse("./ngos.xlsx")
+    try:
+        print(state)
+        d1, d2 = return_states()
+        wb = Workbook()
+        total_ngos = d1[state]['total_ngos']
+        for key, value in d1[state]['pages'].items():
+            if key == "1":
+                ws1 = wb.active
+                ws1.title = "Page_no" + str(key)
+            else:
+                ws1 = wb.create_sheet("Page_no" + str(key))
+            ws1.cell(row=1, column=1, value='row')
+            ws1.cell(row=1, column=2, value="name")
+            ws1.cell(row=1, column=3, value="reg_date")
+            ws1.cell(row=1, column=4, value="address")
+            ws1.cell(row=1, column=5, value="phone no")
+            ws1.cell(row=1, column=6, value="email")
+            i = 2
+            for k in value:
+                ws1.cell(row=i, column=1, value=k['ngo_row'])
+                ws1.cell(row=i, column=2, value=k['ngo_name'])
+                ws1.cell(row=i, column=3, value=k['reg_date'])
+                ws1.cell(row=i, column=4, value=k['ngo_address'])
+                ws1.cell(row=i, column=5, value=k['ngo_mobile'])
+                ws1.cell(row=i, column=6, value=k['ngo_email'])
+                i = i + 1
+        wb.save("./ngos.xlsx")
+        return FileResponse("./ngos.xlsx")
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        logger.info("exception in download api " + str(e) + ' ' + str(exc_tb.tb_lineno))
 
 
 @app.get('/enter_data_2')
 def enter_2(request: Request, dt: dict = None, dw: dict = None):
-    if dt is None:
-        dt = d4
-    s7 = {}
-    sql = 'SELECT * FROM states'
-    c = connect.query_database_df(sql)
-    for r in range(0, len(c)):
-        s7[c['state_name'][r]] = c['pages'][r]
-    if dw is None:
-        dw = s7
-    return templates.TemplateResponse("form_2.html", {"request": request, "states": dt, 'list': dw})
+    try:
+        if dt is None:
+            dt = d4
+        s7 = {}
+        sql = 'SELECT * FROM states'
+        c = connect.query_database_df(sql)
+        for r in range(0, len(c)):
+            s7[c['state_name'][r]] = c['pages'][r]
+        if dw is None:
+            dw = s7
+        return templates.TemplateResponse("form_2.html", {"request": request, "states": dt, 'list': dw})
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        logger.info("exception in enter_2 " + str(e) + ' ' + str(exc_tb.tb_lineno))
 
 
 @app.post('/submit_data_2')
 async def download_2(request: Request, state: str = Form(...), page: str = Form(...), de: dict = None):
-    print(state)
-    print(page)
-    d1, d2 = return_states()
-    if de is None:
-        de = d1[state]['pages'][page]
-    print(de)
-    return templates.TemplateResponse("result.html", {"request": request, "dt": de,"state":state,"page":page})
+    try:
+        print(state)
+        print(page)
+        d1, d2 = return_states()
+        if de is None:
+            de = d1[state]['pages'][page]
+        print(de)
+        return templates.TemplateResponse("result.html", {"request": request, "dt": de, "state": state, "page": page})
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        logger.info("exception in download_2 " + str(e) + ' ' + str(exc_tb.tb_lineno))
 
 
 async def logGenerator(request):
@@ -149,21 +171,29 @@ async def status(websocket: WebSocket):
 
 @app.get("/get_status_data")
 async def get_status_data(request: Request, d21: dict = None, dt: dict = None):
-    d1, d2 = return_states()
-    if d21 is None:
-        d21 = d2
-    if dt is None:
-        dt = d4
-    return templates.TemplateResponse("status.html", {"request": request, "dt": d21, "dr": dt})
+    try:
+        d1, d2 = return_states()
+        if d21 is None:
+            d21 = d2
+        if dt is None:
+            dt = d4
+        return templates.TemplateResponse("status.html", {"request": request, "dt": d21, "dr": dt})
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        logger.info("exception in get_status_data " + str(e) + ' ' + str(exc_tb.tb_lineno))
 
 
 @app.post('/submit_data_3')
 async def download_3(request: Request, state: str = Form(...), status: str = Form(...), de: dict = None):
-    d1, d2 = return_states()
-    print(state)
-    print(status)
-    if de is None:
-        de = d2[state][status]
-    print(de)
+    try:
+        d1, d2 = return_states()
+        print(state)
+        print(status)
+        if de is None:
+            de = d2[state][status]
+        print(de)
 
-    return templates.TemplateResponse("part_status.html", {"request": request, "dt": de,"state":state,"status":status})
+        return templates.TemplateResponse("part_status.html", {"request": request, "dt": de, "state": state, "status": status})
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        logger.info("exception in download_3 " + str(e) + ' ' + str(exc_tb.tb_lineno))
