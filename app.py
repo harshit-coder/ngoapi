@@ -11,8 +11,8 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import FileResponse
 
-from app_moules import return_states
-from workker import *
+from app_moules import *
+#from workker import *
 
 from database import db_connect, LOGFILE
 
